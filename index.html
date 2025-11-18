@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>健康管理紀錄器</title>
+    <title>Health Management Tracker</title>
     
     <style>
-        /* 基本樣式 */
+        /* Basic Styles */
         body {
-            font-family: 'Helvetica', 'Arial', '微軟正黑體', sans-serif;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background-color: #f4f7f6;
             color: #333;
             line-height: 1.6;
@@ -16,7 +16,7 @@
             padding: 20px;
         }
 
-        /* 容器 */
+        /* Container */
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -26,14 +26,14 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
-        /* 網頁主標題 */
+        /* Main Header */
         h1 {
             text-align: center;
             color: #007bff;
             margin-bottom: 30px;
         }
 
-        /* 每個功能模組的樣式 */
+        /* Module Styles */
         .module {
             margin-bottom: 30px;
             padding: 20px;
@@ -49,7 +49,7 @@
             color: #0056b3;
         }
 
-        /* 輸入框和按鈕的共用樣式 */
+        /* Inputs and Buttons */
         input[type="number"],
         input[type="datetime-local"],
         button {
@@ -72,7 +72,7 @@
             background-color: #0056b3;
         }
 
-        /* 表單元素的佈局 */
+        /* Form Layout */
         .form-group {
             margin-bottom: 15px;
         }
@@ -83,7 +83,7 @@
             font-weight: bold;
         }
 
-        /* 結果顯示區域 */
+        /* Results Display */
         .result-display {
             font-size: 1.2em;
             font-weight: bold;
@@ -94,7 +94,7 @@
             border-radius: 5px;
         }
 
-        /* 久坐計時器顯示 */
+        /* Sedentary Timer Display */
         #sedentary-timer-display {
             font-size: 2.5em;
             font-weight: bold;
@@ -103,7 +103,7 @@
             margin: 20px 0;
         }
 
-        /* 紀錄列表 */
+        /* Log List */
         .log-list {
             list-style-type: disc;
             padding-left: 20px;
@@ -118,57 +118,56 @@
 <body>
 
     <div class="container">
-        <h1>健康管理紀錄器</h1>
+        <h1>Health Management Tracker</h1>
 
         <section class="module" id="water-tracker">
-            <h2>💧 喝水紀錄</h2>
+            <h2>💧 Water Tracker</h2>
             <div class="form-group">
-                <label for="water-amount">輸入喝水量 (mL)：</label>
-                <input type="number" id="water-amount" placeholder="例如：250">
-                <button id="add-water">新增紀錄</button>
+                <label for="water-amount">Enter Amount (mL):</label>
+                <input type="number" id="water-amount" placeholder="e.g., 250">
+                <button id="add-water">Add Record</button>
             </div>
             <div class="result-display">
-                今日總喝水量：<span id="total-water">0</span> mL
+                Total Water Today: <span id="total-water">0</span> mL
             </div>
-            <h3>喝水日誌：</h3>
+            <h3>Water Log:</h3>
             <ul id="water-log" class="log-list">
-                </ul>
+            </ul>
         </section>
 
         <section class="module" id="sedentary-tracker">
-            <h2>🧘 久坐時間管理</h2>
-            <p>設定一個計時器（例如30分鐘），時間到會提醒您起來走動。</p>
+            <h2>🧘 Sedentary Reminder</h2>
+            <p>Set a timer (e.g., 30 mins) to remind yourself to get up and move.</p>
             <div id="sedentary-timer-display">30:00</div>
-            <button id="start-sedentary-timer">開始 30 分鐘計時</button>
-            <button id="reset-sedentary-timer">重設計時器</button>
+            <button id="start-sedentary-timer">Start 30-Min Timer</button>
+            <button id="reset-sedentary-timer">Reset Timer</button>
         </section>
 
         <section class="module" id="sleep-tracker">
-            <h2>😴 睡眠時間管理</h2>
+            <h2>😴 Sleep Tracker</h2>
             <div class="form-group">
-                <label for="sleep-start">上床時間：</label>
+                <label for="sleep-start">Bedtime:</label>
                 <input type="datetime-local" id="sleep-start">
             </div>
             <div class="form-group">
-                <label for="sleep-end">起床時間：</label>
+                <label for="sleep-end">Wake-up Time:</label>
                 <input type="datetime-local" id="sleep-end">
             </div>
-            <button id="calculate-sleep">計算睡眠</button>
+            <button id="calculate-sleep">Calculate Sleep</button>
             <div id="sleep-duration" class="result-display">
-                總睡眠時間將顯示在這裡
+                Total sleep duration will appear here
             </div>
-            <h3>睡眠日誌：</h3>
+            <h3>Sleep Log:</h3>
             <ul id="sleep-log" class="log-list">
-                </ul>
+            </ul>
         </section>
 
     </div>
 
     <script>
-        // "DOMContentLoaded" 確保在執行 JS 之前，HTML 頁面已完全載入
         document.addEventListener('DOMContentLoaded', () => {
 
-            // --- 1. 喝水紀錄功能 ---
+            // --- 1. Water Tracker Logic ---
             const waterAmountInput = document.getElementById('water-amount');
             const addWaterBtn = document.getElementById('add-water');
             const totalWaterDisplay = document.getElementById('total-water');
@@ -178,62 +177,53 @@
             addWaterBtn.addEventListener('click', () => {
                 const amount = parseInt(waterAmountInput.value);
 
-                // 簡單的輸入驗證
                 if (isNaN(amount) || amount <= 0) {
-                    alert('請輸入有效的數字');
+                    alert('Please enter a valid number.');
                     return;
                 }
 
-                // 更新總水量
                 currentTotalWater += amount;
                 totalWaterDisplay.textContent = currentTotalWater;
 
-                // 新增到日誌
                 const logEntry = document.createElement('li');
-                const time = new Date().toLocaleTimeString(); // 取得目前時間
-                logEntry.textContent = `[${time}] 新增 ${amount} mL`;
-                waterLog.prepend(logEntry); // prepend 使最新紀錄在最上面
+                const time = new Date().toLocaleTimeString('en-US'); 
+                logEntry.textContent = `[${time}] Added ${amount} mL`;
+                waterLog.prepend(logEntry);
 
-                // 清空輸入框
                 waterAmountInput.value = '';
             });
 
-            // --- 2. 久坐時間管理功能 ---
+            // --- 2. Sedentary Timer Logic ---
             const startTimerBtn = document.getElementById('start-sedentary-timer');
             const resetTimerBtn = document.getElementById('reset-sedentary-timer');
             const timerDisplay = document.getElementById('sedentary-timer-display');
             
-            let timerInterval; // 用於存放計時器
-            let secondsRemaining = 30 * 60; // 30 分鐘 * 60 秒
+            let timerInterval;
+            let secondsRemaining = 30 * 60; 
             const defaultMinutes = 30;
 
-            // 更新計時器顯示的函式
             function updateTimerDisplay() {
                 const minutes = Math.floor(secondsRemaining / 60);
                 const seconds = secondsRemaining % 60;
-                // '0' + seconds 是為了補零 (例如 09, 08...)
                 timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
             }
 
             startTimerBtn.addEventListener('click', () => {
-                // 如果計時器已在執行，先清除
                 if (timerInterval) {
                     clearInterval(timerInterval);
                 }
 
-                // 開始新的計時器
                 timerInterval = setInterval(() => {
                     secondsRemaining--;
                     updateTimerDisplay();
 
                     if (secondsRemaining <= 0) {
                         clearInterval(timerInterval);
-                        alert('久坐時間到！請起來走動一下！');
-                        // 重設回預設時間
+                        alert('Time is up! Get up and move around!');
                         secondsRemaining = defaultMinutes * 60;
                         updateTimerDisplay();
                     }
-                }, 1000); // 每 1000 毫秒 (1秒) 執行一次
+                }, 1000);
             });
 
             resetTimerBtn.addEventListener('click', () => {
@@ -242,11 +232,11 @@
                 }
                 secondsRemaining = defaultMinutes * 60;
                 updateTimerDisplay();
-                alert('計時器已重設');
+                alert('Timer reset.');
             });
 
 
-            // --- 3. 睡眠時間管理功能 ---
+            // --- 3. Sleep Tracker Logic ---
             const sleepStartInput = document.getElementById('sleep-start');
             const sleepEndInput = document.getElementById('sleep-end');
             const calculateSleepBtn = document.getElementById('calculate-sleep');
@@ -257,32 +247,27 @@
                 const startDate = new Date(sleepStartInput.value);
                 const endDate = new Date(sleepEndInput.value);
 
-                // 驗證時間
                 if (isNaN(startDate) || isNaN(endDate)) {
-                    alert('請輸入有效的開始與結束時間');
+                    alert('Please enter valid start and end times.');
                     return;
                 }
 
                 if (endDate <= startDate) {
-                    alert('結束時間必須晚於開始時間');
+                    alert('End time must be later than start time.');
                     return;
                 }
 
-                // 計算時間差 (毫秒)
                 const diffMs = endDate - startDate;
-
-                // 轉換為小時和分鐘
                 const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
                 const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-                const durationText = `總共 ${diffHours} 小時 ${diffMins} 分鐘`;
+                const durationText = `Total: ${diffHours} hr ${diffMins} min`;
                 sleepDurationDisplay.textContent = durationText;
 
-                // 新增到日誌
                 const logEntry = document.createElement('li');
-                const startStr = startDate.toLocaleString();
-                const endStr = endDate.toLocaleString();
-                logEntry.textContent = `${durationText} (從 ${startStr} 到 ${endStr})`;
+                const startStr = startDate.toLocaleString('en-US');
+                const endStr = endDate.toLocaleString('en-US');
+                logEntry.textContent = `${durationText} (From ${startStr} to ${endStr})`;
                 sleepLog.prepend(logEntry);
             });
         });
