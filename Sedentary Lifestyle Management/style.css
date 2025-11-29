@@ -109,3 +109,42 @@ th { color: #666; font-weight: 600; }
 /* BMI */
 .bmi-result { margin-top: 20px; padding: 15px; background-color: #e9ecef; border-radius: 8px; text-align: center; display: none; }
 .bmi-value { font-size: 2.5rem; font-weight: bold; color: #007bff; }
+
+/* === 7. 水杯動畫（Water Tracker） === */
+
+/* 水杯框架容器 */
+.cup-container {
+    width: 120px;
+    height: 200px;
+    margin: 20px auto;
+    position: relative;
+}
+
+/* 外層水杯 */
+.cup {
+    width: 100%;
+    height: 100%;
+    border: 3px solid #3fa9f5;
+    border-radius: 0 0 20px 20px;
+    position: relative;
+    overflow: hidden;
+    background: #f4f9ff;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.06);
+}
+
+/* 水位（會下降） */
+.water {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: rgba(63, 169, 245, 0.55);
+    transition: height 0.4s ease;
+}
+
+/* 數字提示 */
+.water-status {
+    text-align: center;
+    margin-top: 10px;
+    color: #666;
+    font-size: 0.9rem;
+}
