@@ -37,7 +37,10 @@ jobs:
       run: |
         git config --global user.name "GitHub Actions Bot"
         git config --global user.email "actions@github.com"
-        git add food_database.json
-        # Only commit if there are changes
+        
+        # 修改這裡：加入正確路徑的檔案
+        git add Sedentary_Lifestyle_Management/food_database.json
+        
+        # 如果有變動才 commit
         git commit -m "Auto-update food database" || echo "No changes to commit"
         git push
