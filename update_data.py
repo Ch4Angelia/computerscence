@@ -6,27 +6,37 @@ import requests
 import io
 import os
 
-# 1. 下載最新數據
-csv_url = "https://data.fda.gov.tw/opendata/exportDataLinked.do?method=ExportData&InfoId=178&logType=2"
-print("正在下載最新數據...")
+# =================================================================
+# ⚠️ 1. 設定檔案名稱與關鍵欄位名稱 (已使用您提供的名稱)
+# =================================================================
+# 您的 CSV 檔案名稱 (必須與您上傳到GitHub的名稱一模一樣)
+csv_file_name = '食品營養成分資料庫2024UPDATE2.xlsx - 工作表1.csv'
+
+# 您的 CSV 中，食物名稱的欄位名稱
+FOOD_NAME_COLUMN = '樣品名稱' 
+
+# 您的 CSV 中，熱量的欄位名稱
+CALORIE_COLUMN = '熱量(kcal)'
+# =================================================================
+
+
+# 存檔路徑設定
+target_folder = 'Sedentary_Lifestyle_Management'
+filename = os.path.join(target_folder, 'food_database.json')
+backup_filename = os.path.join(target_folder, 'food_database.backup.json')
+
+# 確保資料夾存在
+if not os.path.exists(target_folder):
+    os.makedirs(target_folder, exist_ok=True)
+    
+print(f"正在讀取本機數據: {csv_file_name}...")
 
 try:
-    response = requests.get(csv_url, verify=False)
-    # 嘗試解決編碼問題 (Big5 或 utf-8-sig)
-    response.encoding = 'utf-8-sig' 
-    df = pd.read_csv(io.StringIO(response.text))
+    # 1. 讀取本機 CSV 檔案 (從 GitHub Actions 的環境中讀取)
+    # 這裡假設 CSV 在根目錄
+    # 嘗試解決編碼問題 (utf-8-sig 通常適用於 Excel 導出的 CSV)
+    df = pd.read_csv(csv_file_name, encoding='utf-8-sig')
     
-# === 設定存檔路徑 (修改這裡：存入資料夾內) ===
-    target_folder = 'Sedentary_Lifestyle_Management'
-    
-    # ⚠️ 新增這一行：如果資料夾不存在，就創建它
-    if not os.path.exists(target_folder):
-        os.makedirs(target_folder, exist_ok=True)
-        
-    filename = os.path.join(target_folder, 'food_database.json')
-    backup_filename = os.path.join(target_folder, 'food_database.backup.json')
-    # ==========================================
-
     # 2. 讀取「舊的」JSON 資料 (如果存在)
     old_data_map = {} 
     if os.path.exists(filename):
@@ -40,7 +50,8 @@ try:
     def get_english_name(text):
         try:
             if not text or str(text).isascii(): return text
-            return GoogleTranslator(source='zh-TW', target='en').translate(text)
+            # 由於這是大量數據，使用 GoogleTranslator 會有頻率限制，但測試時可用
+            return GoogleTranslator(source='zh-TW', target='en').translate(text) 
         except:
             return text
 
@@ -51,11 +62,14 @@ try:
 
     # 3. 比對邏輯
     for index, row in df.iterrows():
-        zh_name = row.get('樣品名稱', '').strip()
+        # === 使用新的欄位名稱 ===
+        zh_name = row.get(FOOD_NAME_COLUMN, '').strip()
         if pd.isna(zh_name) or zh_name == '': continue
         
         # 確保數值是字串或數字，處理 NaN
-        new_cal = str(row.get('熱量', '0')).strip()
+        new_cal = str(row.get(CALORIE_COLUMN, '0')).strip()
+        # =======================
+
         if new_cal == 'nan': new_cal = '0'
 
         # 檢查是否已存在
@@ -83,8 +97,8 @@ try:
                 "cal": new_cal
             })
             new_count += 1
-            print(f"新增品項: {zh_name}")
-            time.sleep(0.5) # 避免封鎖
+            # 建議保留 sleep，避免翻譯 API 頻率過高被阻擋
+            time.sleep(0.5) 
 
     # 4. 存檔與備份機制
     if os.path.exists(filename):
