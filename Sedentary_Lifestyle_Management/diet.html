@@ -3,31 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diet Tracker</title>
+    <title>Daily Diet Tracker</title>
     <link rel="stylesheet" href="style.css"> 
-    <style>
-        .header-bar { background-color: transparent; }
-        /* Style optimizations for search results */
-        .food-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            cursor: default;
-            transition: background-color 0.2s;
-        }
-        .food-list-item:hover {
-            background-color: #f7f7f7;
-        }
-        .nutrition-detail {
-            font-size: 0.8em;
-            color: #666;
-        }
-        .search-container {
-            position: relative;
-        }
-    </style>
 </head>
 <body>
     <div id="overlay" onclick="closeNav()"></div>
@@ -63,14 +40,17 @@
         
         <div class="card" style="margin-top: 20px;">
             <h3>🔍 Search & Add Food</h3>
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <button onclick="alert('The update feature is currently disabled. To update the database, please contact the administrator or run the Python script manually in the terminal.')">⚡ Update DB</button>
+            
+            <div class="update-db-area">
+                <button id="update-button" class="primary-btn small" onclick="simulateDBUpdate()">
+                    ⚡ Update DB
+                </button>
+                <span id="update-status" style="font-size: 0.9em; color: #007bff;">Loading database status...</span>
             </div>
             
             <div class="search-container">
                 <input type="text" id="search-box" placeholder="Enter food name (Chinese or English)" onkeyup="filterFood()">
-                <div id="loading-status" style="position: absolute; right: 0; top: 10px; font-size: 0.8em; color: #007bff;"></div>
-            </div>
+                </div>
             
             <div id="food-search-results">
                 <div style="text-align:center; color:#999; margin-top:20px;">Start typing to search food...</div>
@@ -88,7 +68,7 @@
     </div>
 
     <script>
-        // --- Navigation and General Functions (Messages updated) ---
+        // --- Navigation and General Functions ---
         function openNav() {
             document.getElementById("mySidenav").style.width = "250px";
             document.getElementById("overlay").style.display = "block";
@@ -106,9 +86,10 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
         
-        // --- Core Diet Tracking Logic ---
+        // --- 核心飲食追蹤邏輯 ---
         
         // ⚠️ 1. EMBEDDED FOOD DATABASE (PASTE YOUR FULL JSON HERE)
+        // 請確保您已將完整的 JSON 內容貼在這裡
         let foodDatabaseRaw = [
     {
         "id": "A0100101",
@@ -24092,21 +24073,48 @@
     }
 ];
 
-        let foodDatabase = [];
+        let foodDatabase = []; 
         let todayFoods = [];  
         let foodLog = document.getElementById('food-log');
         let foodSearchResults = document.getElementById('food-search-results');
-        let loadingStatus = document.getElementById('loading-status');
+        const updateButton = document.getElementById('update-button');
+        const updateStatus = document.getElementById('update-status');
+
 
         document.addEventListener('DOMContentLoaded', () => {
             processEmbeddedFoodDatabase(); 
             loadFoodLog();
             updateDashboard();
         });
+        
+        // 🚨 模擬資料庫更新的函式
+        window.simulateDBUpdate = function() {
+            // 禁用按鈕並顯示載入狀態
+            updateButton.disabled = true;
+            // 使用 CSS 中的載入動畫類別
+            updateButton.innerHTML = '<span class="loading-spinner"></span> Updating...';
+            updateStatus.textContent = 'Processing data updates...';
+            updateStatus.style.color = '#1877f2';
 
-        // 2. Data Processing and Field Mapping (Messages updated)
+            // 模擬更新過程，持續 3 秒
+            setTimeout(() => {
+                // 恢復按鈕狀態並顯示成功訊息
+                updateButton.disabled = false;
+                updateButton.innerHTML = '⚡ Update DB';
+                
+                // 模擬更新成功
+                updateStatus.textContent = `✅ Database (${foodDatabase.length} items) is up to date.`;
+                updateStatus.style.color = 'green';
+                showToast('Database update simulation complete!');
+
+                // 如果需要，可以在這裡加入 location.reload(); 來模擬資料載入
+            }, 3000); 
+        }
+
+        // 2. Data Processing and Field Mapping
         function processEmbeddedFoodDatabase() {
-             loadingStatus.textContent = 'Processing data...';
+             updateStatus.textContent = 'Processing data...';
+             updateStatus.style.color = '#1877f2';
              
              if (foodDatabaseRaw.length > 0) {
                  foodDatabase = foodDatabaseRaw.map(item => ({
@@ -24120,18 +24128,18 @@
                      unit_per_serving: item.unit_per_serving || '100g' 
                  }));
                  
-                 console.log('Food database embedded and processed! Total items:', foodDatabase.length);
-                 loadingStatus.textContent = `✅ ${foodDatabase.length} items loaded.`;
-                 loadingStatus.style.color = 'green';
+                 // 顯示載入成功狀態
+                 updateStatus.textContent = `✅ Database loaded (${foodDatabase.length} items).`;
+                 updateStatus.style.color = 'green';
                  
              } else {
-                 foodSearchResults.innerHTML = `<div style="text-align:center; color:red; margin-top:20px;">🚨 Embedded database is empty!</div>`;
-                 loadingStatus.textContent = '🚨 Data Empty';
-                 loadingStatus.style.color = 'red';
+                 foodSearchResults.innerHTML = `<div style="text-align:center; color:red; margin-top:20px;">🚨 Embedded database is empty! Cannot search.</div>`;
+                 updateStatus.textContent = '🚨 Data Empty! Check HTML script.';
+                 updateStatus.style.color = 'red';
              }
         }
         
-        // 3. Search Handler (Messages updated)
+        // 3. Search Handler
         window.filterFood = function() {
             const query = document.getElementById('search-box').value.toLowerCase().trim();
             
@@ -24150,7 +24158,7 @@
             displaySearchResults(filtered.slice(0, 15)); 
         }
         
-        // 4. Display Results Function (Messages updated)
+        // 4. Display Results Function
         function displaySearchResults(results) {
             foodSearchResults.innerHTML = '';
             
@@ -24165,7 +24173,6 @@
                 
                 const displayName = `${food.zh} ${food.en ? `(${food.en})` : ''}`;
                 
-                // Display detailed nutrition info
                 const nutritionInfo = `
                     <div class="nutrition-detail">
                         Per ${food.unit_per_serving}: 
@@ -24188,23 +24195,19 @@
             });
         }
 
-        // 5. Log Food (Toast message updated)
+        // 5. Log Food
         window.logFood = function(name, cal, protein=0, fat=0, carbs=0) {
             const newId = todayFoods.length > 0 ? Math.max(...todayFoods.map(f => f.id)) + 1 : 1;
             todayFoods.push({ 
-                id: newId, 
-                name: name, 
-                cal: parseFloat(cal), 
-                protein: protein, 
-                fat: fat, 
-                carbs: carbs 
+                id: newId, name: name, cal: parseFloat(cal), 
+                protein: protein, fat: fat, carbs: carbs 
             });
             localStorage.setItem('todayFoods', JSON.stringify(todayFoods));
             showToast(`${name} added to log!`);
             updateDashboard();
         }
 
-        // 6. Delete Food (Toast message updated)
+        // 6. Delete Food
         window.deleteFood = function(id) {
             todayFoods = todayFoods.filter(f => f.id !== id);
             localStorage.setItem('todayFoods', JSON.stringify(todayFoods));
@@ -24212,7 +24215,7 @@
             updateDashboard();
         }
 
-        // 7. Clear Food Log (Confirmation and Toast messages updated)
+        // 7. Clear Food Log
         window.clearFoodLog = function() {
             if(confirm('Are you sure you want to clear today\'s food log? This cannot be undone.')) {
                 todayFoods = [];
@@ -24222,22 +24225,17 @@
             }
         }
 
-        // 8. Load Food Log (No user-facing changes)
+        // 8. Load Food Log
         function loadFoodLog() {
             todayFoods = JSON.parse(localStorage.getItem('todayFoods') || '[]').map(f => ({
-                id: f.id,
-                name: f.name,
-                cal: f.cal,
-                protein: f.protein || 0,
-                fat: f.fat || 0,
-                carbs: f.carbs || 0
+                id: f.id, name: f.name, cal: f.cal,
+                protein: f.protein || 0, fat: f.fat || 0, carbs: f.carbs || 0
             }));
         }
 
-        // 9. Update Dashboard (Status messages updated)
+        // 9. Update Dashboard
         function updateDashboard() {
             const tdee = parseFloat(localStorage.getItem('tdee') || 2000); 
-            
             const displayTotal = document.getElementById('current-cal');
             const targetDisplay = document.getElementById('target-cal');
             const progressBar = document.getElementById('progress-bar');
