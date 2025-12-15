@@ -1,4 +1,7 @@
-// /api/trigger-update.js
+// /api_trigger_update_backup.js
+
+// 注意：此檔案是備份，目的是避免 Vercel 部署時創建 /api/trigger-update.js。
+// 若要重新啟用後端功能，請將此內容移回 /api/trigger-update.js，並刪除此備份檔案。
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import axios from 'axios';
