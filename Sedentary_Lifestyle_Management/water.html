@@ -45,12 +45,13 @@
 
         <div class="card">
             <h3>Quick Add</h3>
-            <div class="cups">
-                <div class="cup-small" onclick="addWater(250)">250 ml</div>
-                <div class="cup-small" onclick="addWater(500)">500 ml</div>
+            
+            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+                <button class="secondary" onclick="addWater(250)" style="width: 100px;">+250 ml</button>
+                <button class="secondary" onclick="addWater(500)" style="width: 100px;">+500 ml</button>
             </div>
             
-            <div style="margin-top:15px; display:flex; gap:10px;">
+            <div style="display:flex; gap:10px;">
                 <input type="number" id="custom-amount" placeholder="Custom mL" style="margin:0;">
                 <button class="primary-btn" onclick="addCustomWater()">Add</button>
             </div>
@@ -73,14 +74,11 @@
         let records = [];
 
         document.addEventListener('DOMContentLoaded', () => {
-            // 從 Profile 讀取體重來計算目標 (體重 x 30)
             const w = localStorage.getItem('profileWeight');
             if(w) goal = Math.round(w * 30);
             document.getElementById('goal-display').textContent = goal;
 
-            // 讀取紀錄
             records = JSON.parse(localStorage.getItem('waterRecords') || '[]');
-            // 只篩選今天的
             const today = new Date().toLocaleDateString();
             records = records.filter(r => r.date === today);
             
@@ -108,12 +106,9 @@
         }
 
         function saveAndRender() {
-            // 更新全域記錄
             let allRecords = JSON.parse(localStorage.getItem('waterRecords') || '[]');
-            // 移除今天的舊資料
             const today = new Date().toLocaleDateString();
             allRecords = allRecords.filter(r => r.date !== today);
-            // 加入新的
             allRecords = allRecords.concat(records);
             
             localStorage.setItem('waterRecords', JSON.stringify(allRecords));
@@ -122,9 +117,8 @@
 
         function calculateTotal() {
             totalWater = records.reduce((sum, r) => sum + r.amount, 0);
-            localStorage.setItem('totalWater', totalWater); // 給 Dashboard 用
+            localStorage.setItem('totalWater', totalWater);
 
-            // Update UI
             const pct = Math.min(100, (totalWater / goal) * 100);
             document.getElementById('cupWater').style.height = `${pct}%`;
             document.getElementById('progressText').textContent = `${Math.round(pct)}%`;
@@ -136,7 +130,6 @@
                 document.getElementById('liters').textContent = `${rem / 1000}L`;
             }
 
-            // Render list (已修正這裡的語法錯誤)
             const list = document.getElementById('water-log');
             list.innerHTML = '';
             records.slice().reverse().forEach(r => {
@@ -144,8 +137,8 @@
                 div.style.padding = '8px';
                 div.style.borderBottom = '1px solid #eee';
                 div.style.display = 'flex';
-                div.style.justify-content = 'space-between';
-                // ⚠️ 修正重點：這裡使用了反引號 ` ` 包裹 HTML 字串
+                div.style.justifyContent = 'space-between';
+                // ✅ 這裡已修正：加上了反引號 (`)
                 div.innerHTML = `<span>${r.amount} ml</span> <small style="color:#999">${r.time}</small>`;
                 list.appendChild(div);
             });
