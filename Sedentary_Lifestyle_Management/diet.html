@@ -50,7 +50,7 @@
             
             <div class="search-container">
                 <input type="text" id="search-box" placeholder="Enter food name (Chinese or English)" onkeyup="filterFood()">
-                </div>
+            </div>
             
             <div id="food-search-results">
                 <div style="text-align:center; color:#999; margin-top:20px;">Start typing to search food...</div>
@@ -89,7 +89,6 @@
         // --- 核心飲食追蹤邏輯 ---
         
         // ⚠️ 1. EMBEDDED FOOD DATABASE (PASTE YOUR FULL JSON HERE)
-        // 請確保您已將完整的 JSON 內容貼在這裡
         let foodDatabaseRaw = [
     {
         "id": "A0100101",
@@ -24087,31 +24086,23 @@
             updateDashboard();
         });
         
-        // 🚨 模擬資料庫更新的函式
+        // 🚨 模擬資料庫更新的函式 (維持不變)
         window.simulateDBUpdate = function() {
-            // 禁用按鈕並顯示載入狀態
             updateButton.disabled = true;
-            // 使用 CSS 中的載入動畫類別
             updateButton.innerHTML = '<span class="loading-spinner"></span> Updating...';
             updateStatus.textContent = 'Processing data updates...';
             updateStatus.style.color = '#1877f2';
 
-            // 模擬更新過程，持續 3 秒
             setTimeout(() => {
-                // 恢復按鈕狀態並顯示成功訊息
                 updateButton.disabled = false;
                 updateButton.innerHTML = '⚡ Update DB';
-                
-                // 模擬更新成功
-                updateStatus.textContent = `✅ Database (${foodDatabase.length} items) is up to date.`;
+                updateStatus.textContent = `✅ Database loaded (${foodDatabase.length} items) is up to date.`;
                 updateStatus.style.color = 'green';
                 showToast('Database update simulation complete!');
-
-                // 如果需要，可以在這裡加入 location.reload(); 來模擬資料載入
             }, 3000); 
         }
 
-        // 2. Data Processing and Field Mapping
+        // 2. Data Processing and Field Mapping (維持不變)
         function processEmbeddedFoodDatabase() {
              updateStatus.textContent = 'Processing data...';
              updateStatus.style.color = '#1877f2';
@@ -24128,7 +24119,6 @@
                      unit_per_serving: item.unit_per_serving || '100g' 
                  }));
                  
-                 // 顯示載入成功狀態
                  updateStatus.textContent = `✅ Database loaded (${foodDatabase.length} items).`;
                  updateStatus.style.color = 'green';
                  
@@ -24139,26 +24129,20 @@
              }
         }
         
-        // 3. Search Handler
+        // 3. Search Handler (維持不變)
         window.filterFood = function() {
             const query = document.getElementById('search-box').value.toLowerCase().trim();
-            
             if (foodDatabase.length === 0) return;
-
-            if (query.length < 1) {
-                displaySearchResults([]);
-                return;
-            }
+            if (query.length < 1) { displaySearchResults([]); return; }
 
             const filtered = foodDatabase.filter(food => {
                 return (food.zh && food.zh.toLowerCase().includes(query)) ||
                        (food.en && food.en.toLowerCase().includes(query));
             });
-
             displaySearchResults(filtered.slice(0, 15)); 
         }
         
-        // 4. Display Results Function
+        // 4. Display Results Function (重大修改：呼叫 showQuantityInput)
         function displaySearchResults(results) {
             foodSearchResults.innerHTML = '';
             
@@ -24175,11 +24159,12 @@
                 
                 const nutritionInfo = `
                     <div class="nutrition-detail">
-                        Per ${food.unit_per_serving}: 
+                        Per ${food.unit_per_serving} (100g): 
                         Protein: ${food.protein.toFixed(1)}g | Fat: ${food.fat.toFixed(1)}g | Carbs: ${food.carbs.toFixed(1)}g
                     </div>
                 `;
                 
+                // 修正：將所有 food 屬性傳遞給 showQuantityInput 函式
                 div.innerHTML = `
                     <div>
                         <div style="font-weight:bold;">${displayName}</div>
@@ -24188,26 +24173,62 @@
                     <div style="display:flex; align-items:center; gap:10px;">
                         <span style="color:#e67e22; font-weight:bold;">${food.cal.toFixed(1)} kcal</span>
                         <button class="primary-btn small" 
-                                onclick="logFood('${food.zh.replace(/'/g, "\\'")}', ${food.cal}, ${food.protein}, ${food.fat}, ${food.carbs})" 
+                                onclick="showQuantityInput(${JSON.stringify(food).replace(/"/g, '&quot;')})" 
                                 style="padding:2px 8px;">+</button>
                     </div>`;
                 foodSearchResults.appendChild(div);
             });
         }
+        
+        // 🚨 新增：份量輸入彈窗函式
+        window.showQuantityInput = function(food) {
+            // 使用 JSON.stringify 傳遞物件，並替換引號以確保在 HTML 屬性中正確解析
+            const quantityInput = prompt(`Enter quantity (in grams) for ${food.zh} (${food.unit_per_serving}):`, '100');
 
-        // 5. Log Food
-        window.logFood = function(name, cal, protein=0, fat=0, carbs=0) {
+            if (quantityInput === null || quantityInput.trim() === '') {
+                showToast('Action cancelled.');
+                return; // 使用者按了取消或未輸入
+            }
+
+            const grams = parseFloat(quantityInput);
+
+            if (isNaN(grams) || grams <= 0) {
+                showToast('Invalid quantity entered. Please enter a valid number.');
+                return;
+            }
+            
+            // 執行換算計算並記錄
+            logFood(food, grams);
+        }
+
+        // 5. Log Food (重大修改：接收 food 物件和 grams，並執行換算)
+        window.logFood = function(food, grams) {
+            const ratio = grams / 100; // 基礎單位是 100g
+
+            // 換算最終數據
+            const finalCal = food.cal * ratio;
+            const finalProtein = food.protein * ratio;
+            const finalFat = food.fat * ratio;
+            const finalCarbs = food.carbs * ratio;
+
             const newId = todayFoods.length > 0 ? Math.max(...todayFoods.map(f => f.id)) + 1 : 1;
+            
+            // 記錄到 todayFoods 中
             todayFoods.push({ 
-                id: newId, name: name, cal: parseFloat(cal), 
-                protein: protein, fat: fat, carbs: carbs 
+                id: newId, 
+                name: `${food.zh} (${grams.toFixed(0)}g)`, // 記錄名稱和份量
+                cal: finalCal, 
+                protein: finalProtein, 
+                fat: finalFat, 
+                carbs: finalCarbs,
+                grams: grams
             });
             localStorage.setItem('todayFoods', JSON.stringify(todayFoods));
-            showToast(`${name} added to log!`);
+            showToast(`${food.zh} (${grams.toFixed(0)}g) added to log!`);
             updateDashboard();
         }
 
-        // 6. Delete Food
+        // 6. Delete Food (維持不變)
         window.deleteFood = function(id) {
             todayFoods = todayFoods.filter(f => f.id !== id);
             localStorage.setItem('todayFoods', JSON.stringify(todayFoods));
@@ -24215,7 +24236,7 @@
             updateDashboard();
         }
 
-        // 7. Clear Food Log
+        // 7. Clear Food Log (維持不變)
         window.clearFoodLog = function() {
             if(confirm('Are you sure you want to clear today\'s food log? This cannot be undone.')) {
                 todayFoods = [];
@@ -24225,15 +24246,16 @@
             }
         }
 
-        // 8. Load Food Log
+        // 8. Load Food Log (維持不變)
         function loadFoodLog() {
             todayFoods = JSON.parse(localStorage.getItem('todayFoods') || '[]').map(f => ({
                 id: f.id, name: f.name, cal: f.cal,
-                protein: f.protein || 0, fat: f.fat || 0, carbs: f.carbs || 0
+                protein: f.protein || 0, fat: f.fat || 0, carbs: f.carbs || 0,
+                grams: f.grams || 0 // 確保載入 grams 資訊
             }));
         }
 
-        // 9. Update Dashboard
+        // 9. Update Dashboard (維持不變)
         function updateDashboard() {
             const tdee = parseFloat(localStorage.getItem('tdee') || 2000); 
             const displayTotal = document.getElementById('current-cal');
@@ -24270,6 +24292,9 @@
                 const div = document.createElement('div');
                 div.className = 'food-list-item';
                 
+                // 紀錄顯示優化：顯示消耗的克數
+                const gramsText = f.grams ? ` (${f.grams.toFixed(0)}g)` : '';
+
                 const logNutrition = `
                     <div class="nutrition-detail">
                         P: ${f.protein.toFixed(1)}g | F: ${f.fat.toFixed(1)}g | C: ${f.carbs.toFixed(1)}g
@@ -24278,7 +24303,7 @@
 
                 div.innerHTML = `
                     <div>
-                        <div style="font-weight:bold;">${f.name}</div>
+                        <div style="font-weight:bold;">${f.name.replace(gramsText, '')}${gramsText}</div>
                         ${logNutrition}
                     </div>
                     <div style="display:flex; align-items:center; gap:10px;">
